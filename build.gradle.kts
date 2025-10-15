@@ -1,6 +1,5 @@
 plugins {
     id("fabric-loom").version("1.11-SNAPSHOT")
-    id("me.modmuss50.mod-publish-plugin").version("1.0.0")
     id("maven-publish")
 }
 
@@ -18,28 +17,27 @@ fun getModVersion(): String {
 }
 
 group = "${project.property("maven_group")}"
-version = "v${getModVersion()}-mc${project.property("minecraft_version")}"
+version = "v${getModVersion()}"
 
 repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
     maven {
         name = "Fabric"
         url = uri("https://maven.fabricmc.net/")
+    }
+    maven {
+        name = "JitPack"
+        url = uri("https://www.jitpack.io")
     }
 }
 
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
-    mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
+    mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
 
     // dependence
-//    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+    modImplementation("com.github.gnembon:fabric-carpet:${project.property("carpet_version")}")
 }
 
 loom {
@@ -51,7 +49,7 @@ loom {
 tasks.processResources {
     val modId = project.property("mod_id")
     val modName = project.property("mod_name")
-    val modVersion = "${getModVersion()}+mc${project.property("minecraft_version")}"
+    val modVersion = getModVersion()
 
     inputs.property("id", modId)
     inputs.property("name", modName)
@@ -94,37 +92,6 @@ tasks.jar {
     from("LICENSE") {
         rename { "${it}_${inputs.properties["archivesName"]}" }
     }
-}
-
-// [FUNCTION]
-// see more advanced usages
-// https://modmuss50.github.io/mod-publish-plugin
-// modrinth pat
-// https://modrinth.com/settings/pats
-publishMods {
-    val debug = providers.environmentVariable("BUILD_RELEASE").orNull == null
-    dryRun = debug
-    file = tasks.remapJar.get().archiveFile
-    displayName = "${project.property("mod_name")} v${getModVersion()} for Minecraft ${project.property("minecraft_version")}"
-    version = "v${getModVersion()}-mc${project.property("minecraft_version")}"
-    changelog = if (debug) "#Test" else providers.environmentVariable("CHANGELOG").get()
-    modLoaders.add("fabric")
-    type = when {
-        getModVersion().endsWith("alpha") -> ALPHA
-        getModVersion().endsWith("beta") -> BETA
-        else -> STABLE
-    }
-//    modrinth {
-//        accessToken = providers.environmentVariable("MODRINTH_API_KEY")
-//        projectId = "123456"
-//        minecraftVersionRange {
-//            val range = project.property("minecraft_version_range").toString().split(
-//                project.property("split").toString()
-//            )
-//            start = range.first()
-//            end = range.last()
-//        }
-//    }
 }
 
 publishing {

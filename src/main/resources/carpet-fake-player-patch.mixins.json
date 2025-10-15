@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.github.crystal0404.mods.carpetfakeplayerpatch.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "EntityPlayerMPFakeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
